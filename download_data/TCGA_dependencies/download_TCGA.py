@@ -22,5 +22,7 @@ data_df = data_df.set_index('barcode')
 
 # Save data as GZIP pickle
 data_df.to_pickle('../data/TCGA/rnaseq/TCGA_rnaseq_data.pkl', compression='gzip')
-file_annot.to_pickle('../data//TCGA/rnaseq/TCGA_rnaseq_sample_annot.pkl', compression='gzip')
+file_annot.to_pickle('../data/TCGA/rnaseq/TCGA_rnaseq_sample_annot.pkl', compression='gzip')
 features_df.to_pickle('../data/TCGA/rnaseq/TCGA_rnaseq_feature_annot.pkl', compression='gzip')
+
+print("done")

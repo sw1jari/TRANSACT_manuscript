@@ -13,14 +13,20 @@ wget -P ../data/GDSC https://cog.sanger.ac.uk/cmp/download/model_list_20191104.c
 
 # 3) Activate data_download env (micromamba, mamba or conda)
 if command -v micromamba >/dev/null 2>&1; then
-  eval "$(micromamba shell hook --shell posix)"
+  # POSIX-sh hook for micromamba
+  eval "$(micromamba shell hook -s posix)"
   micromamba activate data_download
+
 elif command -v mamba >/dev/null 2>&1; then
-  eval "$(conda shell hook --shell posix)"
+  # POSIX-sh hook so mamba activate works in /bin/sh
+  eval "$(conda shell.posix hook)"
   mamba activate data_download
+
 elif command -v conda >/dev/null 2>&1; then
-  eval "$(conda shell hook --shell posix)"
+  # POSIX-sh hook for conda
+  eval "$(conda shell.posix hook)"
   conda activate data_download
+
 else
   echo "Error: micromamba, mamba or conda not found" >&2
   exit 1

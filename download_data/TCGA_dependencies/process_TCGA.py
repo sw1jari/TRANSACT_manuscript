@@ -29,3 +29,5 @@ response_df = response_df['Table S2']
 response_df.columns = response_df.loc[1]
 response_df = response_df.drop([0,1,2])
 response_df.to_csv('../data/TCGA/response/response.csv')
+print("done")
+

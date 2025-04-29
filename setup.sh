@@ -3,13 +3,13 @@
 # 1) Detect Conda-style manager and initialize shell hook
 if command -v micromamba >/dev/null 2>&1; then
   eval "$(micromamba shell hook --shell posix)"
-  PM=micromamba
+  micromamba activate data_download
 elif command -v mamba >/dev/null 2>&1; then
-  eval "$(conda shell hook --shell posix)"
-  PM=mamba
+  . "$(conda info --base)/etc/profile.d/conda.sh"
+  mamba activate data_download
 elif command -v conda >/dev/null 2>&1; then
-  eval "$(conda shell hook --shell posix)"
-  PM=conda
+  . "$(conda info --base)/etc/profile.d/conda.sh"
+  conda activate data_download
 else
   echo "Error: micromamba, mamba or conda not found" >&2
   exit 1
