@@ -44,23 +44,44 @@ def read_one_methyl_file(s, raw_folder):
             return s, data_df, methyl_carac_df
     return s, data_df, methyl_carac_df[methyl_columns]
 
-
 def read_one_rnaseq_file(s, raw_folder):
+    import os, pandas as pd
+
+    # skip any entries that aren’t sample folders
     if '-' not in s:
         return False
-    
-    files = os.listdir(raw_folder + s)
-    files = [f for f in files if 'htseq.counts.gz' in f or 'FPKM' in f or 'htseq_counts.txt.gz' in f]
-    
-    if len(files) > 1:
-        print('PROBLEME: MORE THAN ONE FILE FOR %s'%(s))
-    
-    counts = gzip.open(raw_folder + s + '/' + files[0], 'rb')
-    counts = pd.read_csv(raw_folder + s + '/' + files[0], compression='gzip', sep='\t', header=None)
-    counts.columns = ['gene', 'count']
-    counts = counts[counts.gene.str.contains('ENSG')]
-    
-    return s, counts, pd.DataFrame()
+
+    sample_dir = os.path.join(raw_folder, s)
+    if not os.path.isdir(sample_dir):
+        # nothing to read here
+        return False
+
+    # look for any .gz files in the sample folder
+    gz_files = [f for f in os.listdir(sample_dir) if f.endswith('.gz')]
+    if not gz_files:
+        print(f"[!] No .gz files found for sample {s} in {sample_dir}")
+        return False
+
+    # prefer ones with “htseq” or “count” in the name, else just take the first .gz
+    candidates = [f for f in gz_files if ('htseq' in f.lower() or 'count' in f.lower())]
+    counts_file = candidates[0] if candidates else gz_files[0]
+    counts_path = os.path.join(sample_dir, counts_file)
+
+    try:
+        df = pd.read_csv(
+            counts_path,
+            compression='gzip',
+            sep='\t',
+            header=None,
+            names=['gene', 'count']
+        )
+    except Exception as e:
+        print(f"[!] Error reading {counts_path}: {e}")
+        return False
+
+    # keep only Ensembl IDs (or adjust your regex as needed)
+    df = df[df['gene'].str.contains('ENSG', na=False)]
+    return s, df, pd.DataFrame()
 
 def read_one_miRNA_file(s, raw_folder):
     if '-' not in s:
