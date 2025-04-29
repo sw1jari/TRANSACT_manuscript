@@ -1,23 +1,38 @@
-#!/usr/bin/env zsh
+#!/bin/sh
 
-# 1) Initialize micromamba in this shell
-eval "$(micromamba shell hook --shell zsh)"
+# Detect available installer and initialize shell hook
+if command -v micromamba >/dev/null 2>&1; then
+  eval "$(micromamba shell hook --shell posix)"
+  PM=micromamba
+elif command -v mamba >/dev/null 2>&1; then
+  eval "$(conda shell hook --shell posix)"
+  PM=mamba
+elif command -v conda >/dev/null 2>&1; then
+  eval "$(conda shell hook --shell posix)"
+  PM=conda
+else
+  echo "Error: conda, mamba or micromamba not found" >&2
+  exit 1
+fi
 
-# 2) Create & activate the data_download env with Python 3.8
-micromamba create -n data_download python=3.8 -y
-micromamba activate data_download
+# Create & activate the environment
+$PM create -n data_download python=3.8 -y
+$PM activate data_download
 
-# 3) Install basic utilities and data-processing dependencies
-micromamba install -n data_download -y \
-    -c anaconda virtualenv \
-    -c conda-forge xlrd=1.2.0 pandas numpy openpyxl joblib \
+# Install utilities and data-processing dependencies
+$PM install -y -c anaconda virtualenv \
+                -c conda-forge xlrd=1.2.0 pandas numpy openpyxl joblib
 
-# 4) Install any extra Python bits for the TCGA scripts
+# Install extra Python bits for TCGA scripts
 pip install -r ./TCGA_dependencies/requirements.txt
 
+# Build & install the GDC client
 git clone https://github.com/NCI-GDC/gdc-client.git
 cd gdc-client
 pip install -r requirements.txt
 python setup.py install
-cd bin
-./package
+cd bin && ./package
+unzip *.zip
+cd ..
+cd ..
+

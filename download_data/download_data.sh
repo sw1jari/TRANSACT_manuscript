@@ -1,3 +1,5 @@
-sh download_GDSC.sh
-sh download_TCGA.sh
-sh download_PDXE.sh
+#!/bin/sh
+
+./download_GDSC.sh
+./download_TCGA.sh
+./download_PDXE.sh
